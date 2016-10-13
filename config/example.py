@@ -156,3 +156,9 @@ LOGGING = {
     }
 
 }
+
+BEFORE_DEPLOY = {
+    "GIT_PATH": "/home",  # git path
+    "FROM_BRANCH": "master",
+    "TO_BRANCH": "release"
+}

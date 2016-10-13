@@ -4,6 +4,7 @@ var URL_ENABLE_AUTO = '/deploy/repo/repo_name/enable_auto';
 var URL_DISENABLE_AUTO = '/deploy/repo/repo_name/disable_auto';
 var URL_ROLLBACK = '/deploy/repo/repo_name/rollback/commit/tag';
 var URL_LOGOUT = '/deploy/logout';
+var URL_DEPLOY_NEW_VERSION = '/before/deploy';
 
 // 更新状态数据
 function reloadStatusData(){
@@ -248,3 +249,46 @@ $( document ).ready(function() {
    set_deploy_status_display();
    set_tag_indicator();
 });
+
+//发布按钮
+$( '#deploy_new_version' ).click(function() {
+   $.ajax({
+            url: URL_DEPLOY_NEW_VERSION,
+            type: 'GET',
+            success: function(result) {
+               document.getElementById('tag_id').value = result["next_tag_name"];
+               document.getElementById('tag_m').value = result["last_commit_content"];
+               $('#bs-example-modal-lg').modal('show');
+            },
+            error: function() {
+               alert('命令发送失败');
+            }
+         })
+});
+
+//保存标签信息
+$('#save_deploy_info').click(function () {
+   $.ajax({
+      url: URL_DEPLOY_NEW_VERSION,
+      type: 'POST',
+      dataType: "json",
+      data: {
+         "tag_id": document.getElementById('tag_id').value,
+         "tag_m": document.getElementById('tag_m').value
+      },
+      success: function (result) {
+         alert("更新分支成功,请等待发布");
+      },
+      error: function () {
+         alert("发布失败");
+      }
+   });
+   $('#bs-example-modal-lg').modal('hide');
+});
+
+//撤销发布时清空表单信息
+function reset_save_deploy_info() {
+   document.getElementById('tag_id').value = '';
+   document.getElementById('tag_m').value = '';
+   $('#bs-example-modal-lg').modal('hide');
+}

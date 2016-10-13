@@ -8,3 +8,4 @@ from .login_handler import LoginHandler
 from .logout_handler import LogoutHandler
 from .register_handler import RegisterHandler
 from .chpwd_handler import ChangePasswordHandler
+from .before_deploy_handler import BeforeDeployHandler

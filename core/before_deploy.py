@@ -163,7 +163,7 @@ class BeforeDeploy:
         """
         self._change_branch(branch)
 
-        command = 'git tag -l "v*.*.*"'
+        command = 'git tag -l "r*.*.*"'
 
         logger_server.info("Get last release tags [CMD:{cmd}]...".format(cmd=command))
 

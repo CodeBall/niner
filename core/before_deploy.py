@@ -11,17 +11,20 @@ import traceback
 logger_server = logging.getLogger("DeployServer.BeforeDeployManager")
 
 
-class BeforeDeploy:
+class Synchronize:
     def __init__(self):
         self.git_path = _BEFORE_DEPLOY["GIT_PATH"]
+        self.from_branch = _BEFORE_DEPLOY["FROM_BRANCH"]
+        self.to_branch = _BEFORE_DEPLOY["TO_BRANCH"]
 
-    def _run_shell_command(self, command, cwd=None):
+    def __run_shell_command(self, command, cwd=None):
         """Inner method to run a shell command
 
         Run a shell command described in param command and redirect stdout and stderr to a temp text file which
         content will be returned if succeed, else the content will be contained in a RepositoryException raised.
 
         :param command: content of a shell command.
+        :param cwd: path of a shell command
         :return: stdout/stderr content
         :raise: RepositoryException if failed
         """
@@ -53,7 +56,7 @@ class BeforeDeploy:
         else:
             return std_content
 
-    def cwd(self, path=None):
+    def __cwd(self, path=None):
         """Change current work directory
 
         :param path: Target directory to change, using git_path if None
@@ -69,7 +72,17 @@ class BeforeDeploy:
             logger_server.info("Fail to change current dir to {path}".format(path=path))
             raise RepositoryException(traceback.print_exc())
 
-    def _change_branch(self, branch):
+    def __stash(self):
+
+        self.__cwd()
+
+        command = "git stash"
+
+        self.__run_shell_command(command)
+
+        logger_server.info(command)
+
+    def __change_branch(self, branch):
         """Change branch
 
         :param branch:Target branch to change
@@ -78,96 +91,96 @@ class BeforeDeploy:
 
         command = "git checkout " + branch
 
-        self.cwd()
+        self.__cwd()
 
-        self._run_shell_command(command)
+        self.__run_shell_command(command)
 
         logger_server.info("checkout branch: " + branch)
 
-    def pull(self, branch):
+    def __pull(self, branch):
         """Pull data
-
         Pull data from remote branch
 
+        :param branch: target branch
         :return: pull content text
         """
-        self._change_branch(branch)
+        self.__change_branch(branch)
 
-        command = "git pull --rebase"
+        command = "git pull"
 
         logger_server.info("Pull data from github[CMD:{cmd}]...".format(cmd=command))
 
-        pull_content = self._run_shell_command(command=command)
+        pull_content = self.__run_shell_command(command=command)
 
         if _DEBUG:
             logger_server.debug("pull_content:" + pull_content)
 
         return pull_content
 
-    def do_merge(self, from_branch, to_branch):
-        """Do merge
+    def __merge(self, from_branch, to_branch):
+        """merge
 
         Merge from from_branch to to_branch
-        :param from_branch:
-        :param to_branch:
+        :param from_branch: source branch
+        :param to_branch: target branch
         :return:
         """
-        self._change_branch(to_branch)
+        self.__change_branch(to_branch)
 
         command = "git merge " + from_branch
 
-        merge_content = self._run_shell_command(command)
+        merge_content = self.__run_shell_command(command)
 
         logger_server.info("git merge " + from_branch)
 
         if _DEBUG:
             logger_server.debug("merge content:" + merge_content)
 
-    def _push_branch(self, branch):
-        """Do push
+    def __push_branch(self, branch):
+        """Do push branch
         Push branch to remote branch
-        :param branch:
+        :param branch: target branch
         :return:
         """
-        self._change_branch(branch)
+        self.__change_branch(branch)
 
         command = "git push origin " + branch
 
-        push_content = self._run_shell_command(command)
+        push_content = self.__run_shell_command(command)
 
         logger_server.info("git push origin " + branch)
 
         if _DEBUG:
             logger_server.debug("push content: " + push_content)
 
-    def get_last_commit(self, branch):
+    def __get_last_commit(self, branch):
         """Get last commit content
 
         :param branch: target branch for commit
         :return: commit content
         """
-        self._change_branch(branch)
+        self.__change_branch(branch)
 
         command = "git log -1 --pretty=format:'%s'"
 
         logger_server.info("Get last commit content [CMD:{cmd}]...".format(cmd=command))
 
-        last_commit = self._run_shell_command(command=command)
+        last_commit = self.__run_shell_command(command=command)
 
         return last_commit.split('\n')[0]
 
-    def get_last_release_tag(self, branch):
+    def __get_last_release_tag(self):
         """Get last release tag
 
         :return: last release tag
         """
-        self._change_branch(branch)
+        self.__cwd()
 
         command = 'git tag -l "r*.*.*"'
 
         logger_server.info("Get last release tags [CMD:{cmd}]...".format(cmd=command))
 
-        tags = self._run_shell_command(command=command)
+        tags = self.__run_shell_command(command=command)
 
         if _DEBUG:
             logger_server.debug("Get release tags: {tags}".format(tags=tags))
@@ -180,7 +193,7 @@ class BeforeDeploy:
             logger_server.info(ex)
             return "r1.1.0"
 
-    def create_tag(self, tag_id, tag_m):
+    def __create_tag(self, tag_id, tag_m):
         """Create Tag
 
         :param tag_id: The version number
@@ -188,29 +201,42 @@ class BeforeDeploy:
         :return:
         """
 
-        self.cwd()
+        self.__cwd()
 
         command = "git tag -a {tag_id} -m '{tag_m}'".format(tag_id=tag_id, tag_m=tag_m)
 
         logger_server.info(command)
 
-        self._run_shell_command(command=command)
+        self.__run_shell_command(command=command)
 
-    def _push_tags(self):
+    def __push_tags(self):
 
         command = "git push --tags"
 
         logger_server.info(command)
 
-        self._run_shell_command(command)
+        self.__run_shell_command(command)
 
-    def push(self, branch):
-        """Push tag and push branch to remote
+    def get_info(self):
+        # Step 1. stash code
+        self.__stash()
+        # Step 2. pull master from remote master
+        self.__pull(self.from_branch)
+        # Step 3. pull release from remote release
+        self.__pull(self.to_branch)
+        # Step 4. merge master to release
+        self.__merge(self.from_branch, self.to_branch)
+        # Step 5. get last commit content
+        last_commit_content = self.__get_last_commit(self.to_branch)
+        # Step 6. get get last tag name
+        last_tag_name = self.__get_last_release_tag()
 
-        :param branch:
-        :return:
-        """
-        self._push_tags()
+        return last_commit_content, last_tag_name
 
-        self._push_branch(branch)
-
+    def release(self, tag_id, tag_m):
+        # Step 1. create tag
+        self.__create_tag(tag_id, tag_m)
+        # Step 2. push tags
+        self.__push_tags()
+        # Step 3. push branch
+        self.__push_branch(self.to_branch)

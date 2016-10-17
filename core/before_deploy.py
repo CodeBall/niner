@@ -93,7 +93,7 @@ class BeforeDeploy:
         """
         self._change_branch(branch)
 
-        command = "git pull --rebase origin " + branch
+        command = "git pull --rebase"
 
         logger_server.info("Pull data from github[CMD:{cmd}]...".format(cmd=command))
 
@@ -123,7 +123,7 @@ class BeforeDeploy:
         if _DEBUG:
             logger_server.debug("merge content:" + merge_content)
 
-    def do_push(self, branch):
+    def _push_branch(self, branch):
         """Do push
         Push branch to remote branch
         :param branch:
@@ -174,5 +174,43 @@ class BeforeDeploy:
 
         tag_list = tags.split('\n')
 
-        return tag_list[-2]
+        try:
+            return tag_list[-2]
+        except Exception as ex:
+            logger_server.info(ex)
+            return "r1.1.0"
+
+    def create_tag(self, tag_id, tag_m):
+        """Create Tag
+
+        :param tag_id: The version number
+        :param tag_m: description
+        :return:
+        """
+
+        self.cwd()
+
+        command = "git tag -a {tag_id} -m '{tag_m}'".format(tag_id=tag_id, tag_m=tag_m)
+
+        logger_server.info(command)
+
+        self._run_shell_command(command=command)
+
+    def _push_tags(self):
+
+        command = "git push --tags"
+
+        logger_server.info(command)
+
+        self._run_shell_command(command)
+
+    def push(self, branch):
+        """Push tag and push branch to remote
+
+        :param branch:
+        :return:
+        """
+        self._push_tags()
+
+        self._push_branch(branch)
 

@@ -15,5 +15,5 @@ URLS = [
             (r'/logout', handlers.LogoutHandler),
             (r'/register', handlers.RegisterHandler),
             (r'/chpwd', handlers.ChangePasswordHandler),
-            (r'/before/deploy', handlers.BeforeDeployHandler)
+            (r'/branch/update', handlers.BeforeDeployHandler)
         ]

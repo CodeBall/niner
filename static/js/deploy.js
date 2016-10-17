@@ -4,7 +4,7 @@ var URL_ENABLE_AUTO = '/deploy/repo/repo_name/enable_auto';
 var URL_DISENABLE_AUTO = '/deploy/repo/repo_name/disable_auto';
 var URL_ROLLBACK = '/deploy/repo/repo_name/rollback/commit/tag';
 var URL_LOGOUT = '/deploy/logout';
-var URL_DEPLOY_NEW_VERSION = '/before/deploy';
+var URL_DEPLOY_NEW_VERSION = '/branch/update';
 
 // 更新状态数据
 function reloadStatusData(){
@@ -263,7 +263,8 @@ $( '#deploy_new_version' ).click(function() {
             error: function() {
                alert('命令发送失败');
             }
-         })
+         });
+   alert("已经发送请求,请稍后填写发布信息");
 });
 
 //保存标签信息
@@ -277,7 +278,7 @@ $('#save_deploy_info').click(function () {
          "tag_m": document.getElementById('tag_m').value
       },
       success: function (result) {
-         alert("更新分支成功,请等待发布");
+         alert(result["msg"]);
       },
       error: function () {
          alert("发布失败");

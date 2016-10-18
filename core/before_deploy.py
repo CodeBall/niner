@@ -1,4 +1,4 @@
-from config import BEFORE_DEPLOY as _BEFORE_DEPLOY, DEBUG as _DEBUG
+from config import SYNCHRONIZE, DEBUG as _DEBUG
 from .repository import RepositoryException, release_tag_cmp
 
 import logging
@@ -13,9 +13,9 @@ logger_server = logging.getLogger("DeployServer.BeforeDeployManager")
 
 class Synchronize:
     def __init__(self):
-        self.git_path = _BEFORE_DEPLOY["GIT_PATH"]
-        self.from_branch = _BEFORE_DEPLOY["FROM_BRANCH"]
-        self.to_branch = _BEFORE_DEPLOY["TO_BRANCH"]
+        self.git_path = SYNCHRONIZE["GIT_PATH"]
+        self.from_branch = SYNCHRONIZE["FROM_BRANCH"]
+        self.to_branch = SYNCHRONIZE["TO_BRANCH"]
 
     def __run_shell_command(self, command, cwd=None):
         """Inner method to run a shell command
@@ -97,7 +97,7 @@ class Synchronize:
 
         logger_server.info("checkout branch: " + branch)
 
-    def __pull(self, branch):
+    def __pull_branch(self, branch):
         """Pull data
         Pull data from remote branch
 
@@ -222,9 +222,9 @@ class Synchronize:
         # Step 1. stash code
         self.__stash()
         # Step 2. pull master from remote master
-        self.__pull(self.from_branch)
+        self.__pull_branch(self.from_branch)
         # Step 3. pull release from remote release
-        self.__pull(self.to_branch)
+        self.__pull_branch(self.to_branch)
         # Step 4. merge master to release
         self.__merge(self.from_branch, self.to_branch)
         # Step 5. get last commit content

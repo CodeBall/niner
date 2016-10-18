@@ -251,7 +251,7 @@ $( document ).ready(function() {
 });
 
 //发布按钮
-$('#deploy_new_version').click(function () {
+$('#deploy').click(function () {
    $.ajax({
       url: URL_DEPLOY_NEW_VERSION,
       type: 'GET',

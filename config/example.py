@@ -157,7 +157,7 @@ LOGGING = {
 
 }
 
-BEFORE_DEPLOY = {
+SYNCHRONIZE = {
     "GIT_PATH": "/home",  # git path
     "FROM_BRANCH": "master",
     "TO_BRANCH": "release"

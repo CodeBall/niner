@@ -95,3 +95,14 @@
 .hidden {
   display: none;
 }
+
+#waiting {
+  z-index: 99;
+  position: absolute;
+  left: 35%;
+  top: 40%;
+  background-color: #B9B5B5;
+  width: 500px;
+  height: 100px;
+  display: none
+}

@@ -251,20 +251,25 @@ $( document ).ready(function() {
 });
 
 //发布按钮
-$( '#deploy_new_version' ).click(function() {
+$('#deploy_new_version').click(function () {
    $.ajax({
-            url: URL_DEPLOY_NEW_VERSION,
-            type: 'GET',
-            success: function(result) {
-               document.getElementById('tag_id').value = result["next_tag_name"];
-               document.getElementById('tag_m').value = result["last_commit_content"];
-               $('#bs-example-modal-lg').modal('show');
-            },
-            error: function() {
-               alert('命令发送失败');
-            }
-         });
-   alert("已经发送请求,请稍后填写发布信息");
+      url: URL_DEPLOY_NEW_VERSION,
+      type: 'GET',
+      beforeSend: function () {
+         document.getElementById('waiting').style.display = "block";
+      },
+      complete: function () {
+         document.getElementById('waiting').style.display = "none";
+      },
+      success: function (result) {
+         document.getElementById('tag_id').value = result["next_tag_name"];
+         document.getElementById('tag_m').value = result["last_commit_content"];
+         $('#bs-example-modal-lg').modal('show');
+      },
+      error: function () {
+         alert('命令发送失败');
+      }
+   });
 });
 
 //保存标签信息
@@ -276,6 +281,12 @@ $('#save_deploy_info').click(function () {
       data: {
          "tag_id": document.getElementById('tag_id').value,
          "tag_m": document.getElementById('tag_m').value
+      },
+      beforeSend: function () {
+         document.getElementById('waiting').style.display = "block";
+      },
+      complete: function () {
+         document.getElementById('waiting').style.display = "none";
       },
       success: function (result) {
          alert(result["msg"]);

@@ -237,7 +237,7 @@ class Synchronize:
     def release(self, tag_id, tag_m):
         # Step 1. create tag
         self.__create_tag(tag_id, tag_m)
-        # Step 2. push tags
-        self.__push_tags()
-        # Step 3. push branch
+        # Step 2. push branch
         self.__push_branch(self.to_branch)
+        # Step 3. push tags
+        self.__push_tags()

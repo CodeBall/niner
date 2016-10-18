@@ -115,9 +115,11 @@
                 </div>
                 <div class="panel-body col-lg-2">
                     <div>
-                        <button type="button" class="btn btn-primary" data-toggle="modal"
-                                id="deploy"> 发布
-                        </button>
+                        {% if status_info['repo_name'] == 'tale' %}
+                            <button type="button" class="btn btn-primary" data-toggle="modal"
+                                    id="deploy"> 发布
+                            </button>
+                        {% end %}
                     </div>
                 </div>
             </div>

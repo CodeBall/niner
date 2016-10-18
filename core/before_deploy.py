@@ -1,5 +1,5 @@
 from config import BEFORE_DEPLOY as _BEFORE_DEPLOY, DEBUG as _DEBUG
-from .repository import RepositoryException
+from .repository import RepositoryException, release_tag_cmp
 
 import logging
 import subprocess
@@ -185,10 +185,11 @@ class Synchronize:
         if _DEBUG:
             logger_server.debug("Get release tags: {tags}".format(tags=tags))
 
-        tag_list = tags.split('\n')
+        tag_list = tags.split('\n')[:-1]
+        tag_list.sort(key=release_tag_cmp, reverse=True)
 
         try:
-            return tag_list[-2]
+            return tag_list[0]
         except Exception as ex:
             logger_server.info(ex)
             return "r1.1.0"

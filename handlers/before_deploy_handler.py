@@ -30,6 +30,6 @@ class BeforeDeployHandler(CommonHandler):
 
         before_deploy.release(tag_id, tag_m)
 
-        return self.finish({"msg": "更新分支成功,请等待发布"})
+        return self.finish({"msg": "请求发送成功,请等待发布"})
 
 
